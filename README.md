@@ -4,36 +4,28 @@ A production-grade, state-of-the-art end-to-end Machine Learning, Signal Denoisi
 
 ---
 
-## 📁 Repository Structure
+## 🔄 100% Replication & Reproducibility Guide
 
+Anyone with this repository can replicate the exact benchmark results, signal denoising, EDA, and model training in **3 simple steps**:
+
+### 1️⃣ Clone Repository & Install Dependencies
+```bash
+git clone https://github.com/Hassan-Raza-Shaikh/ECG-dataset.git
+cd ECG-dataset
+pip install -r requirements.txt
 ```
-ECG-dataset/
-├── data/
-│   └── raw/
-│       └── ptbxl/             # Cleaned PTB-XL dataset & binary cache files
-├── src/
-│   ├── preprocessing.py       # ECG Denoising: Butterworth Highpass/Lowpass, Notch filter, DWT Wavelet Denoising & Normalization
-│   ├── dataset.py             # PyTorch Dataset & DataLoaders with official PTB-XL benchmark fold splits
-│   ├── features.py            # Extract 192 time-domain, spectral PSD, and wavelet energy features per ECG
-│   ├── eda.py                 # Exploratory Data Analysis & 12-lead signal visualization
-│   ├── models.py              # ResNet1D & CNN-BiLSTM-Attention deep neural network architectures
-│   ├── train.py               # ResNet1D training pipeline with PyTorch, AdamW & Cosine Scheduler
-│   ├── train_traditional.py   # Trainer for RandomForest, ExtraTrees, HistGradientBoosting, Linear SVM, LogisticRegression
-│   ├── benchmark.py           # Multi-model benchmark suite & Weighted Stacking Ensemble generator
-│   ├── build_cache.py         # Multi-threaded binary dataset cache builder (1,700 records/sec)
-│   └── evaluate.py            # Test set evaluation (Fold 10) & ROC Curve generator
-├── docs/
-│   ├── SIGNAL_DENOISING.md    # Technical guide on ECG signal preprocessing & filtering math
-│   ├── EDA_REPORT.md          # Comprehensive Exploratory Data Analysis report
-│   └── MODEL_BENCHMARK.md     # Detailed Multi-Model & Stacking Ensemble benchmark leaderboard
-├── configs/
-│   └── config.yaml            # Hyperparameters, filter cutoffs, and pipeline paths
-├── artifacts/
-│   ├── eda/                   # Saved EDA plots (demographics, class distribution, raw vs denoised ECG)
-│   └── models/                # Saved best model checkpoints, ROC curves, and training metrics
-├── .gitignore                 # Git ignore rules for dataset binaries & model checkpoints
-├── requirements.txt           # Python package dependencies
-└── README.md                  # Master project guide & documentation
+
+### 2️⃣ Download PTB-XL Dataset
+You can automatically download and extract the dataset (v1.0.3) from PhysioNet into `data/raw/ptbxl/`:
+```bash
+python src/download_dataset.py
+```
+*(Or manually place `ptbxl_database.csv`, `scp_statements.csv`, `records100/`, `records500/` inside `data/raw/ptbxl/`)*.
+
+### 3️⃣ Run End-to-End Pipeline & Benchmark
+Run the single master command to execute signal denoising, automated EDA, feature extraction, model training, and stacking ensemble evaluation:
+```bash
+PYTHONPATH=. python3 src/benchmark.py
 ```
 
 ---
@@ -69,25 +61,38 @@ For full mathematical documentation, see [`docs/SIGNAL_DENOISING.md`](docs/SIGNA
 
 ---
 
-## 🚀 Quickstart Guide
+## 📁 Repository Structure
 
-### 1. Install Dependencies
-```bash
-pip install -r requirements.txt
 ```
-
-### 2. Run Exploratory Data Analysis (EDA)
-Generates demographic summaries, diagnostic class distributions, co-occurrence heatmaps, and raw vs. denoised 12-lead ECG waveform comparisons:
-```bash
-PYTHONPATH=. python3 src/eda.py
+ECG-dataset/
+├── data/
+│   └── raw/
+│       └── ptbxl/             # Cleaned PTB-XL dataset & binary cache files
+├── src/
+│   ├── download_dataset.py    # Auto-downloader for PTB-XL dataset from PhysioNet
+│   ├── preprocessing.py       # ECG Denoising: Butterworth Highpass/Lowpass, Notch filter, DWT Wavelet Denoising & Normalization
+│   ├── dataset.py             # PyTorch Dataset & DataLoaders with official PTB-XL benchmark fold splits
+│   ├── features.py            # Extract 192 time-domain, spectral PSD, and wavelet energy features per ECG
+│   ├── eda.py                 # Exploratory Data Analysis & 12-lead signal visualization
+│   ├── models.py              # ResNet1D & CNN-BiLSTM-Attention deep neural network architectures
+│   ├── train.py               # ResNet1D training pipeline with PyTorch, AdamW & Cosine Scheduler
+│   ├── train_traditional.py   # Trainer for RandomForest, ExtraTrees, HistGradientBoosting, Linear SVM, LogisticRegression
+│   ├── benchmark.py           # Multi-model benchmark suite & Weighted Stacking Ensemble generator
+│   ├── build_cache.py         # Multi-threaded binary dataset cache builder (1,700 records/sec)
+│   └── evaluate.py            # Test set evaluation (Fold 10) & ROC Curve generator
+├── docs/
+│   ├── SIGNAL_DENOISING.md    # Technical guide on ECG signal preprocessing & filtering math
+│   ├── EDA_REPORT.md          # Comprehensive Exploratory Data Analysis report
+│   └── MODEL_BENCHMARK.md     # Detailed Multi-Model & Stacking Ensemble benchmark leaderboard
+├── configs/
+│   └── config.yaml            # Hyperparameters, filter cutoffs, and pipeline paths
+├── artifacts/
+│   ├── eda/                   # Saved EDA plots (demographics, class distribution, raw vs denoised ECG)
+│   └── models/                # Saved best model checkpoints, ROC curves, and training metrics
+├── .gitignore                 # Git ignore rules for dataset binaries & model checkpoints
+├── requirements.txt           # Python package dependencies
+└── README.md                  # Master project guide & documentation
 ```
-
-### 3. Run Multi-Model Benchmark Suite
-Trains traditional ML models, deep neural networks, and evaluates the Weighted Stacking Ensemble:
-```bash
-PYTHONPATH=. python3 src/benchmark.py
-```
-Outputs saved in `artifacts/models/multi_model_benchmark_results.csv` and visual plot charts!
 
 ---
 
