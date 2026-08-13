@@ -1,0 +1,38 @@
+# Configuration for PTB-XL 12-Lead ECG Machine Learning Pipeline
+
+data:
+  raw_dir: "data/raw/ptbxl"
+  database_csv: "data/raw/ptbxl/ptbxl_database.csv"
+  scp_csv: "data/raw/ptbxl/scp_statements.csv"
+  sampling_rate: 100 # Options: 100 or 500 Hz
+  num_leads: 12
+  signal_length: 1000 # 10 seconds at 100 Hz
+
+preprocessing:
+  apply_denoising: true
+  highpass_cutoff: 0.5 # Hz (removes baseline wander)
+  lowpass_cutoff: 40.0 # Hz (removes high frequency muscle noise)
+  notch_freq: 50.0 # Hz (removes powerline interference, set to 60 for US)
+  notch_q: 30.0 # Quality factor for notch filter
+  apply_wavelet_denoising: false
+  wavelet_name: "sym8"
+  wavelet_level: 4
+  normalize: "zscore" # Options: zscore, minmax, none
+
+split:
+  train_folds: [1, 2, 3, 4, 5, 6, 7, 8]
+  val_folds: [9]
+  test_folds: [10]
+
+training:
+  model_name: "ResNet1D" # Options: ResNet1D, CNN_BiLSTM_Attention
+  batch_size: 64
+  epochs: 5
+  learning_rate: 0.001
+  weight_decay: 0.0001
+  num_workers: 0
+  device: "mps" # "cuda", "mps", or "cpu"
+  save_dir: "artifacts/models"
+
+eda:
+  save_dir: "artifacts/eda"

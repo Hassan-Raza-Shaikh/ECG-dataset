@@ -1,0 +1,21 @@
+# Dataset and raw signal files
+data/
+*.npy
+*.dat
+*.hea
+
+# Generated model checkpoints & plot artifacts
+artifacts/
+*.pth
+
+# Python cache & environment
+__pycache__/
+*.pyc
+.venv/
+env/
+venv/
+
+# System files
+.DS_Store
+.vscode/
+.idea/
