@@ -1,5 +1,10 @@
 # 🫀 PTB-XL 12-Lead ECG Machine Learning & Signal Processing Pipeline
 
+![Python 3.10+](https://img.shields.io/badge/Python-3.10%2B-blue.svg)
+![PyTorch](https://img.shields.io/badge/PyTorch-2.0%2B-ee4c2c.svg)
+![Dataset](https://img.shields.io/badge/Dataset-PTB--XL--v1.0.3-green.svg)
+![Open Source](https://img.shields.io/badge/Open_Source-Public-brightgreen.svg)
+
 A production-grade, state-of-the-art end-to-end Machine Learning, Signal Denoising, and Multi-Model Benchmarking pipeline built for the **PTB-XL 12-lead Electrocardiography Dataset** (21,837 clinical 10-second ECG records from 18,885 patients).
 
 ---
