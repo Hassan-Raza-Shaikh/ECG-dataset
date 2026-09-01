@@ -24,7 +24,7 @@ class ECGPreprocessor:
         notch_q=30.0,
         apply_wavelet=True,
         wavelet_name="sym8",
-        wavelet_level=4,
+        wavelet_level=None,
         normalize="zscore",
     ):
         self.sampling_rate = sampling_rate
@@ -34,7 +34,13 @@ class ECGPreprocessor:
         self.notch_q = notch_q
         self.apply_wavelet = apply_wavelet
         self.wavelet_name = wavelet_name
-        self.wavelet_level = wavelet_level
+        
+        # Automatically set wavelet level 5 for 500 Hz (500 / 2^5 = 15.6 Hz) vs level 4 for 100 Hz
+        if wavelet_level is None:
+            self.wavelet_level = 5 if sampling_rate >= 500 else 4
+        else:
+            self.wavelet_level = wavelet_level
+            
         self.normalize_method = normalize
 
     def highpass_filter(self, signal, order=5):
