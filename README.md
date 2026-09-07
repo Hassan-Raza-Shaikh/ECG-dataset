@@ -19,10 +19,11 @@ If you are new to the codebase, every script in [`src/`](src/) is numbered seque
 | 2️⃣ **`src/01_download_dataset.py`** | **Step 1 - Dataset Downloader**: Auto-downloads PTB-XL (v1.0.3) from PhysioNet directly into `data/raw/ptbxl/`. | `python src/01_download_dataset.py` |
 | 3️⃣ **`src/02_verify_denoising_quality.py`** | **Step 2 - Noise Removal Verification**: Proves quantitatively (+16 dB SNR Gain, 97.4% $r$) that noise is removed without distorting ECG peaks. | `PYTHONPATH=. python3 src/02_verify_denoising_quality.py` |
 | 4️⃣ **`src/03_exploratory_data_analysis.py`** | **Step 3 - Data Visualizer (EDA)**: Analyzes demographics, diagnostic frequencies, and generates 12-lead signal plots. | `PYTHONPATH=. python3 src/03_exploratory_data_analysis.py` |
-| 5️⃣ **`src/04_train_classical_ml_models.py`** | **Step 4 - Classical ML Models**: Extracts 192 features and trains Random Forest, HistGradientBoosting, ExtraTrees, SVM, and Logistic Regression. | `PYTHONPATH=. python3 src/04_train_classical_ml_models.py` |
-| 6️⃣ **`src/05_train_deep_learning_resnet.py`** | **Step 5 - Deep Neural Net (ResNet1D)**: Trains the 1D Deep Residual CNN architecture on Apple Silicon GPU/MPS or CUDA. | `PYTHONPATH=. python3 src/05_train_deep_learning_resnet.py` |
-| 7️⃣ **`src/06_run_full_benchmark_and_ensemble.py`**| **Step 6 - Full Benchmark & Ensemble**: Compares all 8 models and evaluates the **Weighted Stacking Ensemble (91.82% AUC Champion)**. | `PYTHONPATH=. python3 src/06_run_full_benchmark_and_ensemble.py` |
-| 8️⃣ **`src/07_export_preprocessed_data_to_csv.py`** | **Step 7 - Export Features to CSV**: Exports metadata, superclasses, and 192 preprocessed features into Excel/Pandas CSV. | `PYTHONPATH=. python3 src/07_export_preprocessed_data_to_csv.py` |
+| 5️⃣ **`src/03b_channel_selection.py`** | **Step 3b - Channel Selection (EEG/ECG Ratio)**: Identifies top 3-4 unique channels via Non-Stationary Inter/Intra class variance. | `PYTHONPATH=. python3 src/03b_channel_selection.py` |
+| 6️⃣ **`src/04_train_classical_ml_models.py`** | **Step 4 - Classical ML Models**: Extracts 192 features and trains Random Forest, HistGradientBoosting, ExtraTrees, SVM, and Logistic Regression. | `PYTHONPATH=. python3 src/04_train_classical_ml_models.py` |
+| 7️⃣ **`src/05_train_deep_learning_resnet.py`** | **Step 5 - Deep Neural Net (ResNet1D)**: Trains the 1D Deep Residual CNN architecture on Apple Silicon GPU/MPS or CUDA. | `PYTHONPATH=. python3 src/05_train_deep_learning_resnet.py` |
+| 8️⃣ **`src/06_run_full_benchmark_and_ensemble.py`**| **Step 6 - Full Benchmark & Ensemble**: Compares all 8 models and evaluates the **Weighted Stacking Ensemble (91.82% AUC Champion)**. | `PYTHONPATH=. python3 src/06_run_full_benchmark_and_ensemble.py` |
+| 9️⃣ **`src/07_export_preprocessed_data_to_csv.py`** | **Step 7 - Export Features to CSV**: Exports metadata, superclasses, and 192 preprocessed features into Excel/Pandas CSV. | `PYTHONPATH=. python3 src/07_export_preprocessed_data_to_csv.py` |
 
 ---
 
