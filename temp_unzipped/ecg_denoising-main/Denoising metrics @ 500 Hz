@@ -1,7 +1,0 @@
-Denoising metrics @ 500 Hz
-  SNR_in_dB     : -1.7569
-  SNR_out_dB    : 13.3665
-  SNR_imp_dB    : 15.1235
-  RMSE          : 0.0218
-  PRD_percent   : 21.4622
-  Pearson_r     : 0.9722
