@@ -171,10 +171,132 @@ class CNN_BiLSTM_Attention(nn.Module):
         return logits
 
 
-def build_model(model_name, in_channels=12, num_classes=5):
+class PatchEmbedding1D(nn.Module):
+    """
+    1D Patch Embedding layer for temporal biomedical signals.
+    Divides a multi-channel 1D signal into non-overlapping patches and projects to embed_dim.
+    """
+
+    def __init__(self, in_channels=4, patch_size=50, embed_dim=128):
+        super(PatchEmbedding1D, self).__init__()
+        self.patch_size = patch_size
+        self.proj = nn.Conv1d(
+            in_channels=in_channels,
+            out_channels=embed_dim,
+            kernel_size=patch_size,
+            stride=patch_size,
+            bias=False
+        )
+        self.norm = nn.LayerNorm(embed_dim)
+
+    def forward(self, x):
+        # x: (batch_size, in_channels, seq_len)
+        x = self.proj(x) # (batch_size, embed_dim, num_patches)
+        x = x.transpose(1, 2) # (batch_size, num_patches, embed_dim)
+        x = self.norm(x)
+        return x
+
+
+class ECG_ViT1D(nn.Module):
+    """
+    1D Vision Transformer (ViT) Architecture for ECG Signal Classification on Selected Leads.
+    
+    Flow:
+      Selected Leads Signal (e.g. 4 leads x 1000 time steps)
+      -> 1D Patch Embedding (non-overlapping temporal patches)
+      -> Prepend learnable [CLS] token
+      -> Add learnable 1D Positional Encodings
+      -> L Transformer Encoder Layers (Pre-LN Multi-Head Self-Attention + FFN)
+      -> Classification Head ([CLS] output -> LayerNorm -> Linear -> Logits)
+    """
+
+    def __init__(
+        self,
+        in_channels=4,
+        seq_len=1000,
+        patch_size=50,
+        embed_dim=128,
+        depth=4,
+        num_heads=4,
+        mlp_ratio=2.0,
+        dropout=0.1,
+        num_classes=5
+    ):
+        super(ECG_ViT1D, self).__init__()
+        self.in_channels = in_channels
+        self.seq_len = seq_len
+        self.patch_size = patch_size
+        self.num_patches = seq_len // patch_size
+        self.embed_dim = embed_dim
+
+        # 1. Patch Embedding
+        self.patch_embed = PatchEmbedding1D(in_channels=in_channels, patch_size=patch_size, embed_dim=embed_dim)
+
+        # 2. Learnable [CLS] Token and 1D Positional Embeddings
+        self.cls_token = nn.Parameter(torch.zeros(1, 1, embed_dim))
+        self.pos_embed = nn.Parameter(torch.zeros(1, self.num_patches + 1, embed_dim))
+        self.pos_drop = nn.Dropout(p=dropout)
+
+        # 3. Transformer Encoder Blocks (Pre-LN)
+        encoder_layer = nn.TransformerEncoderLayer(
+            d_model=embed_dim,
+            nhead=num_heads,
+            dim_feedforward=int(embed_dim * mlp_ratio),
+            dropout=dropout,
+            activation="gelu",
+            batch_first=True,
+            norm_first=True
+        )
+        self.transformer = nn.TransformerEncoder(encoder_layer, num_layers=depth)
+
+        # 4. Norm and Classification Head
+        self.norm = nn.LayerNorm(embed_dim)
+        self.head = nn.Sequential(
+            nn.Dropout(0.2),
+            nn.Linear(embed_dim, num_classes)
+        )
+
+        # Initialize weights
+        nn.init.trunc_normal_(self.pos_embed, std=0.02)
+        nn.init.trunc_normal_(self.cls_token, std=0.02)
+        self.apply(self._init_weights)
+
+    def _init_weights(self, m):
+        if isinstance(m, nn.Linear):
+            nn.init.trunc_normal_(m.weight, std=0.02)
+            if m.bias is not None:
+                nn.init.constant_(m.bias, 0)
+        elif isinstance(m, nn.LayerNorm):
+            nn.init.constant_(m.bias, 0)
+            nn.init.constant_(m.weight, 1.0)
+
+    def extract_features(self, x):
+        """Extracts latent [CLS] feature vector (for downstream feature concatenation)."""
+        B = x.shape[0]
+        x = self.patch_embed(x) # (B, num_patches, embed_dim)
+
+        cls_tokens = self.cls_token.expand(B, -1, -1)
+        x = torch.cat((cls_tokens, x), dim=1) # (B, num_patches + 1, embed_dim)
+        x = x + self.pos_embed
+        x = self.pos_drop(x)
+
+        x = self.transformer(x)
+        cls_feature = self.norm(x[:, 0]) # (B, embed_dim)
+        return cls_feature
+
+    def forward(self, x):
+        # x shape: (batch_size, in_channels, seq_len)
+        features = self.extract_features(x)
+        logits = self.head(features) # (batch_size, num_classes)
+        return logits
+
+
+def build_model(model_name, in_channels=12, num_classes=5, seq_len=1000):
     if model_name == "ResNet1D":
         return ResNet1D(in_channels=in_channels, num_classes=num_classes)
     elif model_name == "CNN_BiLSTM_Attention":
         return CNN_BiLSTM_Attention(in_channels=in_channels, num_classes=num_classes)
+    elif model_name in ["ECG_ViT1D", "ViT1D", "ViT"]:
+        return ECG_ViT1D(in_channels=in_channels, seq_len=seq_len, num_classes=num_classes)
     else:
         raise ValueError(f"Unknown model architecture: {model_name}")

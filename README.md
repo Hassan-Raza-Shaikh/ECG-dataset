@@ -22,23 +22,25 @@ If you are new to the codebase, every script in [`src/`](src/) is numbered seque
 | 5️⃣ **`src/03b_channel_selection.py`** | **Step 3b - Channel Selection (EEG/ECG Ratio)**: Identifies top 3-4 unique channels via Non-Stationary Inter/Intra class variance. | `PYTHONPATH=. python3 src/03b_channel_selection.py` |
 | 6️⃣ **`src/04_train_classical_ml_models.py`** | **Step 4 - Classical ML Models**: Extracts 192 features and trains Random Forest, HistGradientBoosting, ExtraTrees, SVM, and Logistic Regression. | `PYTHONPATH=. python3 src/04_train_classical_ml_models.py` |
 | 7️⃣ **`src/05_train_deep_learning_resnet.py`** | **Step 5 - Deep Neural Net (ResNet1D)**: Trains the 1D Deep Residual CNN architecture on Apple Silicon GPU/MPS or CUDA. | `PYTHONPATH=. python3 src/05_train_deep_learning_resnet.py` |
-| 8️⃣ **`src/06_run_full_benchmark_and_ensemble.py`**| **Step 6 - Full Benchmark & Ensemble**: Compares all 8 models and evaluates the **Weighted Stacking Ensemble (91.82% AUC Champion)**. | `PYTHONPATH=. python3 src/06_run_full_benchmark_and_ensemble.py` |
-| 9️⃣ **`src/07_export_preprocessed_data_to_csv.py`** | **Step 7 - Export Features to CSV**: Exports metadata, superclasses, and 192 preprocessed features into Excel/Pandas CSV. | `PYTHONPATH=. python3 src/07_export_preprocessed_data_to_csv.py` |
+| 8️⃣ **`src/05b_train_vit_selected_leads.py`** | **Step 5b - Vision Transformer (ViT)**: Trains 1D-ViT using only the 4 selected unique leads [aVF, III, I, II]. | `PYTHONPATH=. python3 src/05b_train_vit_selected_leads.py` |
+| 9️⃣ **`src/06_run_full_benchmark_and_ensemble.py`**| **Step 6 - Full Benchmark & Ensemble**: Compares all 8 models and evaluates the **Weighted Stacking Ensemble (91.82% AUC Champion)**. | `PYTHONPATH=. python3 src/06_run_full_benchmark_and_ensemble.py` |
+| 🔟 **`src/07_export_preprocessed_data_to_csv.py`** | **Step 7 - Export Features to CSV**: Exports metadata, superclasses, and 192 preprocessed features into Excel/Pandas CSV. | `PYTHONPATH=. python3 src/07_export_preprocessed_data_to_csv.py` |
 
 ---
 
 ## 🏆 Multi-Model Benchmark Leaderboard (Held-Out Test Set Fold 10)
 
-| Rank | Model Architecture / Ensemble | Model Type | Test Macro ROC-AUC | Test Precision | Test Macro F1 |
-| :---: | :--- | :---: | :---: | :---: | :---: |
-| 🥇 **1** | **Weighted Stacking Ensemble** | **Hybrid Deep+Tree Stacking** | **0.9182 (91.82%)** | **0.8030** | **0.6759** |
-| 🥈 **2** | **ResNet1D** | Deep Residual 1D CNN | **0.9079 (90.79%)** | 0.7663 | 0.6696 |
-| 🥉 **3** | **CNN-BiLSTM-Attention** | Spatial-Temporal Deep Net | **0.9028 (90.28%)** | 0.7591 | **0.6761** |
-| 4 | **HistGradientBoosting** | Histogram Tree Ensemble | **0.8675 (86.75%)** | 0.7474 | 0.6033 |
-| 5 | **RandomForest** | Random Decision Forests | **0.8512 (85.12%)** | 0.7621 | 0.5431 |
-| 6 | **ExtraTrees** | Extremely Randomized Trees | **0.8274 (82.74%)** | 0.7704 | 0.4577 |
-| 7 | **SVM_Linear** | Calibrated Support Vector Machine | **0.8263 (82.63%)** | 0.7310 | 0.5179 |
-| 8 | **LogisticRegression** | L2 Regularized Linear Model | **0.8240 (82.40%)** | 0.7147 | 0.5381 |
+| Rank | Model Architecture / Ensemble | Model Type | Channels Used | Test Macro ROC-AUC | Test Precision | Test Macro F1 |
+| :---: | :--- | :---: | :---: | :---: | :---: | :---: |
+| 🥇 **1** | **Weighted Stacking Ensemble** | **Hybrid Deep+Tree Stacking** | 12 Leads | **0.9182 (91.82%)** | **0.8030** | **0.6759** |
+| 🥈 **2** | **ResNet1D** | Deep Residual 1D CNN | 12 Leads | **0.9079 (90.79%)** | 0.7663 | 0.6696 |
+| 🥉 **3** | **CNN-BiLSTM-Attention** | Spatial-Temporal Deep Net | 12 Leads | **0.9028 (90.28%)** | 0.7591 | **0.6761** |
+| 4 | **HistGradientBoosting** | Histogram Tree Ensemble | 12 Leads | **0.8675 (86.75%)** | 0.7474 | 0.6033 |
+| 5 | **RandomForest** | Random Decision Forests | 12 Leads | **0.8512 (85.12%)** | 0.7621 | 0.5431 |
+| ⚡ | **ECG_ViT1D (Vision Transformer)** | **1D Vision Transformer** | **4 Selected Leads (`aVF`, `III`, `I`, `II`)** | **0.8400 (84.00%)** | 0.6569 | 0.5765 |
+| 6 | **ExtraTrees** | Extremely Randomized Trees | 12 Leads | **0.8274 (82.74%)** | 0.7704 | 0.4577 |
+| 7 | **SVM_Linear** | Calibrated Support Vector Machine | 12 Leads | **0.8263 (82.63%)** | 0.7310 | 0.5179 |
+| 8 | **LogisticRegression** | L2 Regularized Linear Model | 12 Leads | **0.8240 (82.40%)** | 0.7147 | 0.5381 |
 
 For detailed model performance reports and ROC curves, see [`docs/MODEL_BENCHMARK.md`](docs/MODEL_BENCHMARK.md).
 
