@@ -174,17 +174,21 @@ class CNN_BiLSTM_Attention(nn.Module):
 class PatchEmbedding1D(nn.Module):
     """
     1D Patch Embedding layer for temporal biomedical signals.
-    Divides a multi-channel 1D signal into non-overlapping patches and projects to embed_dim.
+    Supports both non-overlapping patches (stride = patch_size) and
+    overlapping patches (stride < patch_size).
     """
 
-    def __init__(self, in_channels=4, patch_size=50, embed_dim=128):
+    def __init__(self, in_channels=4, patch_size=50, stride=None, padding=0, embed_dim=128):
         super(PatchEmbedding1D, self).__init__()
         self.patch_size = patch_size
+        self.stride = stride if stride is not None else patch_size
+        self.padding = padding
         self.proj = nn.Conv1d(
             in_channels=in_channels,
             out_channels=embed_dim,
             kernel_size=patch_size,
-            stride=patch_size,
+            stride=self.stride,
+            padding=self.padding,
             bias=False
         )
         self.norm = nn.LayerNorm(embed_dim)
@@ -200,10 +204,11 @@ class PatchEmbedding1D(nn.Module):
 class ECG_ViT1D(nn.Module):
     """
     1D Vision Transformer (ViT) Architecture for ECG Signal Classification on Selected Leads.
+    Supports both distinct and overlapping temporal patches.
     
     Flow:
-      Selected Leads Signal (e.g. 4 leads x 1000 time steps)
-      -> 1D Patch Embedding (non-overlapping temporal patches)
+      Selected Leads Signal (e.g. 4 leads x 5000 time steps at 500 Hz)
+      -> 1D Overlapping Patch Embedding (e.g. patch_size=100, stride=50 -> 99 overlapping tokens)
       -> Prepend learnable [CLS] token
       -> Add learnable 1D Positional Encodings
       -> L Transformer Encoder Layers (Pre-LN Multi-Head Self-Attention + FFN)
@@ -215,6 +220,7 @@ class ECG_ViT1D(nn.Module):
         in_channels=4,
         seq_len=1000,
         patch_size=50,
+        patch_stride=None,
         embed_dim=128,
         depth=4,
         num_heads=4,
@@ -226,11 +232,17 @@ class ECG_ViT1D(nn.Module):
         self.in_channels = in_channels
         self.seq_len = seq_len
         self.patch_size = patch_size
-        self.num_patches = seq_len // patch_size
+        self.patch_stride = patch_stride if patch_stride is not None else patch_size
+        self.num_patches = (seq_len - patch_size) // self.patch_stride + 1
         self.embed_dim = embed_dim
 
-        # 1. Patch Embedding
-        self.patch_embed = PatchEmbedding1D(in_channels=in_channels, patch_size=patch_size, embed_dim=embed_dim)
+        # 1. Patch Embedding (Supports Overlapping Patches)
+        self.patch_embed = PatchEmbedding1D(
+            in_channels=in_channels,
+            patch_size=patch_size,
+            stride=self.patch_stride,
+            embed_dim=embed_dim
+        )
 
         # 2. Learnable [CLS] Token and 1D Positional Embeddings
         self.cls_token = nn.Parameter(torch.zeros(1, 1, embed_dim))
@@ -291,12 +303,18 @@ class ECG_ViT1D(nn.Module):
         return logits
 
 
-def build_model(model_name, in_channels=12, num_classes=5, seq_len=1000):
+def build_model(model_name, in_channels=12, num_classes=5, seq_len=1000, patch_size=50, patch_stride=None):
     if model_name == "ResNet1D":
         return ResNet1D(in_channels=in_channels, num_classes=num_classes)
     elif model_name == "CNN_BiLSTM_Attention":
         return CNN_BiLSTM_Attention(in_channels=in_channels, num_classes=num_classes)
     elif model_name in ["ECG_ViT1D", "ViT1D", "ViT"]:
-        return ECG_ViT1D(in_channels=in_channels, seq_len=seq_len, num_classes=num_classes)
+        return ECG_ViT1D(
+            in_channels=in_channels,
+            seq_len=seq_len,
+            patch_size=patch_size,
+            patch_stride=patch_stride,
+            num_classes=num_classes
+        )
     else:
         raise ValueError(f"Unknown model architecture: {model_name}")
